@@ -1,0 +1,114 @@
+@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    /* ── Typography ── */
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+    /* ── Primary Green (from AppColors.primaryGreen #1B5E20) ── */
+    --color-primary-50:  #E8F5E9;
+    --color-primary-100: #C8E6C9;
+    --color-primary-400: #66BB6A;
+    --color-primary-600: #2E7D32;
+    --color-primary-700: #1B5E20;
+    --color-primary-800: #145218;
+
+    /* ── Danger / Red ── */
+    --color-danger-50:  #FFEBEE;
+    --color-danger-400: #EF5350;
+    --color-danger-700: #B71C1C;
+
+    /* ── Warning / Orange ── */
+    --color-warning-50:  #FFF3E0;
+    --color-warning-400: #FF8F00;
+    --color-warning-700: #E65100;
+
+    /* ── Info / Blue ── */
+    --color-info-50:  #E3F2FD;
+    --color-info-400: #2196F3;
+    --color-info-700: #1565C0;
+
+    /* ── Success ── */
+    --color-success-50:  #E8F5E9;
+    --color-success-400: #66BB6A;
+    --color-success-700: #2E7D32;
+
+    /* ── Neutral ── */
+    --color-surface:     #FFFFFF;
+    --color-background:  #F8F9FA;
+    --color-border:      #E0E0E0;
+    --color-text-100:    #1A1A1A;
+    --color-text-300:    #424242;
+    --color-text-500:    #616161;
+    --color-text-700:    #9E9E9E;
+
+    /* ── Spacing extensions ── */
+    --spacing-sidebar:   240px;
+    --spacing-topbar:    64px;
+
+    /* ── Border radius ── */
+    --radius-chip:  20px;
+}
+
+/* ── Base Styles ── */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    background-color: #F8F9FA;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F8F9FA; }
+::-webkit-scrollbar-thumb { background: #C8E6C9; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #2E7D32; }
+
+/* ── Sidebar active item ── */
+.nav-item-active {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    border-left: 3px solid #1B5E20;
+    font-weight: 600;
+}
+
+.nav-item-active svg {
+    color: #1B5E20;
+}
+
+.nav-item-inactive {
+    color: #616161;
+    border-left: 3px solid transparent;
+}
+
+.nav-item-inactive:hover {
+    background-color: #F8F9FA;
+    color: #1B5E20;
+}
+
+/* ── Brand gradient ── */
+.brand-gradient {
+    background: linear-gradient(135deg, #2E7D32 0%, #66BB6A 100%);
+}
+
+/* ── Card shadow ── */
+.card-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card-shadow-primary {
+    box-shadow: 2px 5px 16px rgba(27, 94, 32, 0.20);
+}
+
+/* ── Transition ── */
+.transition-sidebar {
+    transition: all 200ms ease;
+}
+
