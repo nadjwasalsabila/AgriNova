@@ -97,6 +97,14 @@ class AuthController extends Controller
                 ->with('success', 'Selamat datang kembali, ' . session('admin_name') . '!');
 
         } catch (\Exception $e) {
+            // Fallback to env credentials if they match the admin configuration in .env
+            $adminEmail = env('ADMIN_EMAIL', 'admin@petanimaju.com');
+            $adminPass  = env('ADMIN_PASSWORD_PLAIN', 'admin123');
+
+            if ($request->email === $adminEmail && $request->password === $adminPass) {
+                return $this->loginWithEnvCredentials($request);
+            }
+
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => $e->getMessage()]);

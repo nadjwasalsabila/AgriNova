@@ -64,7 +64,7 @@
                             >
                                 <option value="" disabled selected>Pilih Kategori</option>
                                 <option value="Pestisida" {{ old('kategori') == 'Pestisida' ? 'selected' : '' }}>Pestisida</option>
-                                <option value="Fungsida" {{ old('kategori') == 'Fungsida' ? 'selected' : '' }}>Fungsida</option>
+                                <option value="Fungisida" {{ old('kategori') == 'Fungisida' ? 'selected' : '' }}>Fungisida</option>
                                 <option value="Insektisida" {{ old('kategori') == 'Insektisida' ? 'selected' : '' }}>Insektisida</option>
                                 <option value="Pupuk Cair" {{ old('kategori') == 'Pupuk Cair' ? 'selected' : '' }}>Pupuk Cair</option>
                                 <option value="Pupuk Organik" {{ old('kategori') == 'Pupuk Organik' ? 'selected' : '' }}>Pupuk Organik</option>

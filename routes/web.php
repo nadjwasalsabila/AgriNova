@@ -29,5 +29,11 @@ Route::middleware(['web', 'admin.auth'])->prefix('admin')->name('admin.')->group
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('obat', ObatController::class);
     Route::resource('artikel', ArtikelController::class);
+
+    // Hama & Rekomendasi Obat
+    Route::get('/hama', [\App\Http\Controllers\HamaController::class, 'index'])->name('hama.index');
+    Route::get('/hama/{id}', [\App\Http\Controllers\HamaController::class, 'show'])->name('hama.show');
+    Route::post('/hama/{id}/rekomendasi', [\App\Http\Controllers\HamaController::class, 'storeRekomendasi'])->name('hama.rekomendasi.store');
+    Route::delete('/hama/{hamaId}/rekomendasi/{id}', [\App\Http\Controllers\HamaController::class, 'destroyRekomendasi'])->name('hama.rekomendasi.destroy');
 });
 

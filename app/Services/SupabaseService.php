@@ -165,7 +165,7 @@ class SupabaseService
      * Count rows in a Supabase table using Content-Range header.
      * Returns -1 if table doesn't exist or on error.
      */
-    public function count(string $table, string $accessToken = null): int
+    public function count(string $table, string $accessToken = null, bool $suppressWarnings = false): int
     {
         if (! $this->isConfigured()) {
             return -1;
@@ -186,10 +186,12 @@ class SupabaseService
             ]);
 
             if ($response->failed()) {
-                Log::warning("SupabaseService: failed to count '{$table}'", [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
+                if (! $suppressWarnings) {
+                    Log::warning("SupabaseService: failed to count '{$table}'", [
+                        'status' => $response->status(),
+                        'body'   => $response->body(),
+                    ]);
+                }
                 return -1;
             }
 
@@ -201,7 +203,9 @@ class SupabaseService
 
             return count($response->json() ?? []);
         } catch (\Throwable $e) {
-            Log::error("SupabaseService: exception counting '{$table}': " . $e->getMessage());
+            if (! $suppressWarnings) {
+                Log::error("SupabaseService: exception counting '{$table}': " . $e->getMessage());
+            }
             return -1;
         }
     }
@@ -246,11 +250,13 @@ class SupabaseService
         }
 
         foreach ($tables as $table) {
-            $count = $this->count($table, $accessToken);
+            $count = $this->count($table, $accessToken, true);
             if ($count >= 0) {
                 return $count;
             }
         }
+
+        Log::warning("SupabaseService: failed to count with fallbacks for tables: " . implode(', ', $tables));
 
         return -1;
     }

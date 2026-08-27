@@ -101,7 +101,7 @@ class DashboardController extends Controller
         // Run counts with database structure fallbacks
         return [
             'tanaman'   => $this->supabase->countWithFallbacks(['tanaman', 'plants'], $token),
-            'penyakit'  => $this->supabase->countWithFallbacks(['penyakit', 'diseases', 'hama'], $token),
+            'penyakit'  => $this->supabase->countWithFallbacks(['hama', 'penyakit', 'diseases'], $token),
             'obat'      => $this->supabase->countWithFallbacks(['obat', 'medicines'], $token),
             'artikel'   => $this->supabase->countWithFallbacks(['tips', 'artikel', 'articles'], $token),
             'users'     => $this->supabase->countUsers() === -1 

@@ -65,7 +65,7 @@
                             >
                                 @php
                                     $currentCat = old('kategori', $obat['kategori'] ?? '');
-                                    $categories = ['Pestisida', 'Fungsida', 'Insektisida', 'Pupuk Cair', 'Pupuk Organik', 'Nutrisi Tanaman'];
+                                    $categories = ['Pestisida', 'Fungisida', 'Insektisida', 'Pupuk Cair', 'Pupuk Organik', 'Nutrisi Tanaman'];
                                 @endphp
                                 <option value="" disabled>Pilih Kategori</option>
                                 @foreach($categories as $cat)

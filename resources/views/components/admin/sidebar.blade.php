@@ -20,7 +20,7 @@
         ],
         [
             'label'  => 'Database Hama',
-            'route'  => '#',
+            'route'  => 'admin.hama.index',
             'icon'   => 'bug',
         ],
         [
