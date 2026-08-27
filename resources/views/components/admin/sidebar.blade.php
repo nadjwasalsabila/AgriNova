@@ -30,17 +30,12 @@
         ],
         [
             'label'  => 'Riwayat Scan AI',
-            'route'  => '#',
+            'route'  => 'admin.riwayat-scan.index',
             'icon'   => 'camera',
         ],
         [
-            'label'  => 'Jadwal Tanam',
-            'route'  => '#',
-            'icon'   => 'calendar',
-        ],
-        [
             'label'  => 'Pengaturan',
-            'route'  => '#',
+            'route'  => 'admin.settings.index',
             'icon'   => 'settings',
         ],
     ];

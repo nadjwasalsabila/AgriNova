@@ -76,17 +76,6 @@
                         {!! $iconPaths[$stat['icon']] ?? '' !!}
                     </svg>
                 </div>
-
-                {{-- Status dot --}}
-                @if($isNA)
-                    <span class="text-[10px] font-semibold text-[#9E9E9E] bg-[#F5F5F5] px-2 py-0.5 rounded-full">
-                        Tidak ada data
-                    </span>
-                @else
-                    <span class="text-[10px] font-semibold text-[#2E7D32] bg-[#E8F5E9] px-2 py-0.5 rounded-full">
-                        Live
-                    </span>
-                @endif
             </div>
 
             {{-- Value --}}
@@ -100,27 +89,28 @@
 </div>
 
 {{-- ── Lower Section ── --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 gap-4">
 
     {{-- Recent Scan Activity ── --}}
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-[#E0E0E0] card-shadow overflow-hidden">
+    <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-[#E0E0E0]">
             <div>
                 <h3 class="text-sm font-bold text-[#1A1A1A]">Aktivitas Scan AI Terbaru</h3>
                 <p class="text-xs text-[#9E9E9E] mt-0.5">Deteksi penyakit dari pengguna mobile</p>
             </div>
-            <span class="text-xs font-medium text-[#2E7D32] bg-[#E8F5E9] px-3 py-1 rounded-full cursor-pointer
-                         hover:bg-[#C8E6C9] transition-colors">
+            <a href="{{ route('admin.riwayat-scan.index') }}"
+               class="text-xs font-medium text-[#2E7D32] bg-[#E8F5E9] px-3 py-1 rounded-full
+                      hover:bg-[#C8E6C9] transition-colors">
                 Lihat Semua
-            </span>
+            </a>
         </div>
 
         @if(count($recentScans) > 0)
             <div class="divide-y divide-[#F5F5F5]">
                 @foreach($recentScans as $scan)
                     @php
-                        $isHealthy  = str_contains(strtolower($scan['disease_name'] ?? ''), 'sehat')
-                                   || str_contains(strtolower($scan['disease_name'] ?? ''), 'healthy');
+                        $isHealthy  = str_contains(strtolower($scan['disease'] ?? ''), 'sehat')
+                                   || str_contains(strtolower($scan['disease'] ?? ''), 'healthy');
                         $confidence = isset($scan['confidence']) ? round($scan['confidence'] * 100) : null;
                         $createdAt  = isset($scan['created_at'])
                             ? \Carbon\Carbon::parse($scan['created_at'])->locale('id')->diffForHumans()
@@ -145,7 +135,7 @@
                         {{-- Info --}}
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold text-[#1A1A1A] truncate">
-                                {{ $scan['disease_name'] ?? 'Unknown' }}
+                                {{ $scan['disease'] ?? 'Unknown' }}
                             </p>
                             <p class="text-xs text-[#9E9E9E] truncate">
                                 {{ $scan['plant_type'] ?? '—' }} • {{ $createdAt }}
@@ -187,116 +177,6 @@
                 </p>
             </div>
         @endif
-    </div>
-
-    {{-- Info Panel ── --}}
-    <div class="flex flex-col gap-4">
-
-        {{-- Supabase Connection Status --}}
-        <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow p-5">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-9 h-9 rounded-xl {{ $supabaseOnline ? 'bg-[#E8F5E9]' : 'bg-[#FFF3E0]' }} flex items-center justify-center">
-                    <svg class="w-5 h-5 {{ $supabaseOnline ? 'text-[#1B5E20]' : 'text-[#E65100]' }}"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-[#1A1A1A]">Koneksi Supabase</p>
-                    <p class="text-xs text-[#9E9E9E]">Status database</p>
-                </div>
-            </div>
-
-            @if($supabaseOnline)
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse"></span>
-                    <span class="text-xs font-medium text-[#1B5E20]">Terhubung</span>
-                </div>
-                <p class="text-xs text-[#BDBDBD] mt-2">Data ditampilkan secara real-time dari Supabase.</p>
-            @else
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-[#FF8F00]"></span>
-                    <span class="text-xs font-medium text-[#E65100]">Belum dikonfigurasi</span>
-                </div>
-                <p class="text-xs text-[#BDBDBD] mt-2 leading-relaxed">
-                    Isi <code class="bg-[#F8F9FA] px-1 rounded text-[#424242]">SUPABASE_URL</code>
-                    dan <code class="bg-[#F8F9FA] px-1 rounded text-[#424242]">SUPABASE_ANON_KEY</code>
-                    di file <code class="bg-[#F8F9FA] px-1 rounded text-[#424242]">.env</code>.
-                </p>
-            @endif
-        </div>
-
-        {{-- Auth Info --}}
-        <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow p-5">
-            <p class="text-xs font-semibold text-[#9E9E9E] uppercase tracking-wide mb-3">Sesi Admin</p>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-[#9E9E9E]">Metode Auth</span>
-                    <span class="text-xs font-semibold text-[#424242] bg-[#F8F9FA] px-2 py-0.5 rounded-md capitalize">
-                        {{ session('auth_method', 'env') === 'supabase' ? 'Supabase' : 'Dev Mode' }}
-                    </span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-[#9E9E9E]">Admin ID</span>
-                    <span class="text-xs font-semibold text-[#424242] bg-[#F8F9FA] px-2 py-0.5 rounded-md max-w-[130px] truncate">
-                        {{ session('admin_id') ? substr(session('admin_id'), 0, 8).'…' : 'N/A' }}
-                    </span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-[#9E9E9E]">Token</span>
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-md
-                        {{ session('supabase_token') ? 'text-[#1B5E20] bg-[#E8F5E9]' : 'text-[#9E9E9E] bg-[#F8F9FA]' }}">
-                        {{ session('supabase_token') ? 'Valid' : 'Tidak Ada' }}
-                    </span>
-                </div>
-                @if(session('supabase_expires_at'))
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-[#9E9E9E]">Expired</span>
-                        <span class="text-xs font-semibold text-[#424242] bg-[#F8F9FA] px-2 py-0.5 rounded-md">
-                            {{ \Carbon\Carbon::createFromTimestamp(session('supabase_expires_at'))->locale('id')->diffForHumans() }}
-                        </span>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        {{-- System Info --}}
-        <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow p-5">
-            <p class="text-xs font-semibold text-[#9E9E9E] uppercase tracking-wide mb-3">Informasi Sistem</p>
-            <div class="space-y-3">
-                @foreach([
-                    ['label' => 'Laravel', 'value' => app()->version()],
-                    ['label' => 'PHP',     'value' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION],
-                    ['label' => 'Env',     'value' => app()->environment()],
-                ] as $info)
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs text-[#9E9E9E]">{{ $info['label'] }}</span>
-                        <span class="text-xs font-semibold text-[#424242] bg-[#F8F9FA] px-2 py-0.5 rounded-md">
-                            {{ $info['value'] }}
-                        </span>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- Mobile App Badge --}}
-        <div class="rounded-2xl p-5 bg-[#E8F5E9] border border-[#C8E6C9]">
-            <div class="flex items-start gap-3">
-                <div class="w-9 h-9 rounded-xl bg-[#1B5E20] flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold text-[#1B5E20]">Aplikasi Mobile</p>
-                    <p class="text-xs text-[#2E7D32] mt-1 leading-relaxed">
-                        Konten yang dikelola di sini akan tampil di aplikasi Petani Maju.
-                    </p>
-                </div>
-            </div>
-        </div>
     </div>
 
 </div>

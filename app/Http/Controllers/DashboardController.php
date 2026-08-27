@@ -98,14 +98,22 @@ class DashboardController extends Controller
             return array_fill_keys(['tanaman', 'penyakit', 'obat', 'artikel', 'users', 'transaksi'], -1);
         }
 
-        // Run counts with database structure fallbacks
+        // Total tanaman = 3 jenis (Padi, Teh, Tomat)
+        $totalTanaman = 3;
+
+        // Total penyakit = gabungan dari 3 tabel penyakit
+        $penyakitPadi  = $this->supabase->count('penyakit_padi', $token);
+        $penyakitTeh   = $this->supabase->count('penyakit_teh', $token);
+        $penyakitTomat = $this->supabase->count('penyakit_tomat', $token);
+        $totalPenyakit = max(0, $penyakitPadi) + max(0, $penyakitTeh) + max(0, $penyakitTomat);
+
         return [
-            'tanaman'   => $this->supabase->countWithFallbacks(['tanaman', 'plants'], $token),
-            'penyakit'  => $this->supabase->countWithFallbacks(['hama', 'penyakit', 'diseases'], $token),
+            'tanaman'   => $totalTanaman,
+            'penyakit'  => $totalPenyakit,
             'obat'      => $this->supabase->countWithFallbacks(['obat', 'medicines'], $token),
             'artikel'   => $this->supabase->countWithFallbacks(['tips', 'artikel', 'articles'], $token),
-            'users'     => $this->supabase->countUsers() === -1 
-                ? $this->supabase->countWithFallbacks(['users', 'profiles', 'members'], $token) 
+            'users'     => $this->supabase->countUsers() === -1
+                ? $this->supabase->countWithFallbacks(['users', 'profiles', 'members'], $token)
                 : $this->supabase->countUsers(),
             'transaksi' => $this->supabase->countWithFallbacks(['transaksi', 'transactions'], $token),
         ];
@@ -113,7 +121,7 @@ class DashboardController extends Controller
 
     private function fetchRecentScans(?string $token): array
     {
-        if (! $this->supabase->isConfigured() || ! $token) {
+        if (! $this->supabase->isConfigured()) {
             return [];
         }
 
@@ -123,9 +131,9 @@ class DashboardController extends Controller
 
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'apikey'        => $key,
-                'Authorization' => "Bearer {$token}",
+                'Authorization' => "Bearer {$key}",
             ])->get("{$url}/rest/v1/prediction_history", [
-                'select'   => 'id,created_at,plant_type,disease_name,confidence,image_url',
+                'select'   => 'id,created_at,plant_type,disease,confidence,image_url',
                 'order'    => 'created_at.desc',
                 'limit'    => 8,
             ]);

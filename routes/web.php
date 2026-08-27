@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ObatController;
 use App\Http\Controllers\ArtikelController;
+use App\Http\Controllers\RiwayatScanController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,5 +38,16 @@ Route::middleware(['web', 'admin.auth'])->prefix('admin')->name('admin.')->group
     Route::get('/hama/{id}', [\App\Http\Controllers\HamaController::class, 'show'])->name('hama.show');
     Route::post('/hama/{id}/rekomendasi', [\App\Http\Controllers\HamaController::class, 'storeRekomendasi'])->name('hama.rekomendasi.store');
     Route::delete('/hama/{hamaId}/rekomendasi/{id}', [\App\Http\Controllers\HamaController::class, 'destroyRekomendasi'])->name('hama.rekomendasi.destroy');
+
+    // Riwayat Scan AI
+    Route::get('/riwayat-scan', [RiwayatScanController::class, 'index'])->name('riwayat-scan.index');
+
+    // Pengaturan Akun
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+
+    // Notifikasi
+    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 });
 

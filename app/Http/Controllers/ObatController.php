@@ -100,6 +100,14 @@ class ObatController extends Controller
                 'gambar'    => $imageUrl,
             ], $token);
 
+            // ── Notification ──
+            \App\Services\NotificationService::add(
+                'obat_create',
+                'Obat Baru Ditambahkan 💊',
+                "Obat \"{$request->nama}\" ({$request->kategori}) berhasil ditambahkan.",
+                route('admin.obat.index')
+            );
+
             return redirect()->route('admin.obat.index')
                 ->with('success', 'Data obat berhasil ditambahkan!');
 
@@ -199,6 +207,14 @@ class ObatController extends Controller
                 'gambar'    => $imageUrl,
             ], $token);
 
+            // ── Notification ──
+            \App\Services\NotificationService::add(
+                'obat_update',
+                'Data Obat Diperbarui ✏️',
+                "Informasi obat \"{$request->nama}\" telah diperbarui.",
+                route('admin.obat.index')
+            );
+
             return redirect()->route('admin.obat.index')
                 ->with('success', 'Data obat berhasil diperbarui!');
 
@@ -236,6 +252,15 @@ class ObatController extends Controller
                 if (! empty($obat['gambar'])) {
                     $this->deleteImageFromUrl($obat['gambar']);
                 }
+
+                // ── Notification ──
+                $namaObat = $obat['nama'] ?? 'Obat';
+                \App\Services\NotificationService::add(
+                    'obat_delete',
+                    'Obat Dihapus 🗑️',
+                    "Data obat \"{$namaObat}\" telah dihapus dari sistem.",
+                    route('admin.obat.index')
+                );
 
                 return redirect()->route('admin.obat.index')
                     ->with('success', 'Data obat berhasil dihapus!');
