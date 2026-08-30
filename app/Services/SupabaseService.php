@@ -392,6 +392,60 @@ class SupabaseService
     }
 
     /**
+     * Update records matching an arbitrary PostgREST filter condition.
+     * Example: $condition = "obat_id=eq.5"  or  "id=eq.3"
+     */
+    public function updateByCondition(string $table, string $condition, array $data, string $accessToken = null): bool
+    {
+        if (! $this->isConfigured()) {
+            return false;
+        }
+
+        try {
+            $key   = $this->serviceKey ?: $this->anonKey;
+            $token = $accessToken ?? $key;
+
+            $response = Http::withHeaders([
+                'apikey'        => $key,
+                'Authorization' => "Bearer {$token}",
+                'Content-Type'  => 'application/json',
+                'Prefer'        => 'return=minimal',
+            ])->patch("{$this->url}/rest/v1/{$table}?{$condition}", $data);
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error("SupabaseService: exception in updateByCondition on {$table}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Delete records matching an arbitrary PostgREST filter condition.
+     * Example: $condition = "obat_id=eq.5"
+     */
+    public function deleteByCondition(string $table, string $condition, string $accessToken = null): bool
+    {
+        if (! $this->isConfigured()) {
+            return false;
+        }
+
+        try {
+            $key   = $this->serviceKey ?: $this->anonKey;
+            $token = $accessToken ?? $key;
+
+            $response = Http::withHeaders([
+                'apikey'        => $key,
+                'Authorization' => "Bearer {$token}",
+            ])->delete("{$this->url}/rest/v1/{$table}?{$condition}");
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error("SupabaseService: exception in deleteByCondition on {$table}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Delete a record from a table by ID.
      */
     public function delete(string $table, $id, string $accessToken = null): bool

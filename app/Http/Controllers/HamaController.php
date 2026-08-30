@@ -68,18 +68,51 @@ class HamaController extends Controller
                 }
                 $rows = $this->supabase->select($tbl, $params, $token);
 
+                // Fetch many-to-many relations for this plant type
+                $type = match ($tbl) {
+                    'penyakit_padi'  => 'padi',
+                    'penyakit_teh'   => 'teh',
+                    'penyakit_tomat' => 'tomat',
+                    default          => null,
+                };
+
+                $relations = [];
+                if ($type) {
+                    $relations = $this->supabase->select('obat_penyakit_relation', [
+                        'select'        => 'penyakit_id,obat(*)',
+                        'penyakit_type' => 'eq.' . $type
+                    ], $token);
+                }
+
+                // Group obats by disease ID
+                $obatMap = [];
+                foreach ($relations as $rel) {
+                    if (! empty($rel['obat'])) {
+                        $obatMap[$rel['penyakit_id']][] = $rel['obat'];
+                    }
+                }
+
                 foreach ($rows as $r) {
+                    $linkedObats = $obatMap[$r['id']] ?? [];
+
+                    // Comma-separated names for quick text fallback representation
+                    $obatNamaList = collect($linkedObats)->pluck('nama')->implode(', ');
+                    if (empty($obatNamaList)) {
+                        $obatNamaList = $r['obat'] ?? null;
+                    }
+
                     $all[] = [
-                        'id'            => $r['id'],
-                        'nama'          => $r['nama_penyakit'] ?? '-',
-                        'kategori'      => $labelMap[$tbl] ?? $tbl,
-                        'gambar_url'    => $r['image'] ?? null,
-                        'deskripsi'     => $r['deskripsi_penyakit'] ?? '-',
-                        'ciri_ciri'     => null, // penyakit tables don't have this field
-                        'cara_mengatasi'=> $r['penanganan'] ?? '-',
-                        'obat'          => $r['obat'] ?? '-',
-                        'jenis'         => 'penyakit',
-                        '_table'        => $tbl,
+                        'id'             => $r['id'],
+                        'nama'           => $r['nama_penyakit'] ?? '-',
+                        'kategori'       => $labelMap[$tbl] ?? $tbl,
+                        'gambar_url'     => $r['image'] ?? null,
+                        'deskripsi'      => $r['deskripsi_penyakit'] ?? '-',
+                        'ciri_ciri'      => null,
+                        'cara_mengatasi' => $r['penanganan'] ?? '-',
+                        'obat'           => $obatNamaList,
+                        'obats'          => $linkedObats,
+                        'jenis'          => 'penyakit',
+                        '_table'         => $tbl,
                     ];
                 }
             }

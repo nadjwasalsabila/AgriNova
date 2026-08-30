@@ -31,7 +31,7 @@
 
     {{-- ── Form Card ── --}}
     <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow overflow-hidden">
-        <form method="POST" action="{{ route('admin.obat.update', $obat['id']) }}" enctype="multipart/form-data" class="p-6">
+        <form id="form-edit-obat" method="POST" action="{{ route('admin.obat.update', $obat['id']) }}" enctype="multipart/form-data" class="p-6">
             @csrf
             @method('PUT')
 
@@ -100,16 +100,18 @@
                                 <span class="text-sm font-semibold text-[#9E9E9E]">Rp</span>
                             </div>
                             <input
-                                type="number"
+                                type="text"
+                                inputmode="numeric"
                                 name="harga"
                                 id="harga"
                                 required
-                                min="0"
-                                value="{{ old('harga', $obat['harga'] ?? '') }}"
-                                placeholder="Contoh: 45000"
+                                value="{{ old('harga') ? number_format((float) old('harga'), 0, ',', '.') : number_format((float) ($obat['harga'] ?? 0), 0, ',', '.') }}"
+                                placeholder="Contoh: 45.000"
+                                autocomplete="off"
                                 class="w-full pl-10 pr-4 py-2.5 text-sm text-[#1A1A1A] bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 transition-colors"
                             >
                         </div>
+                        <p class="text-[11px] text-[#9E9E9E] mt-1">Ketik angka saja, titik ribuan otomatis ditambahkan. Contoh: ketik <span class="font-semibold">41500</span> → tampil <span class="font-semibold">41.500</span></p>
                     </div>
 
                     {{-- Deskripsi --}}
@@ -124,7 +126,62 @@
                             class="w-full px-4 py-2.5 text-sm text-[#1A1A1A] bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 transition-colors"
                         >{{ old('deskripsi', $obat['deskripsi'] ?? '') }}</textarea>
                     </div>
+
+                    {{-- ── Penyakit yang Ditangani ── --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-[#424242] mb-1">Penyakit yang Ditangani</label>
+                        <p class="text-xs text-[#9E9E9E] mb-3">Centang penyakit yang cocok ditangani oleh obat ini.</p>
+
+                        @php
+                            $oldPenyakit = old('penyakit', null);
+                        @endphp
+
+                        @if(! empty($allPenyakit))
+                            <div class="space-y-4">
+                                @foreach($allPenyakit as $table => $group)
+                                    @if(! empty($group['data']))
+                                        <div class="border border-[#E0E0E0] rounded-xl overflow-hidden">
+                                            {{-- Group Header --}}
+                                            <div class="flex items-center justify-between px-4 py-2.5 bg-[#F8F9FA] border-b border-[#E0E0E0]">
+                                                <span class="text-sm font-bold text-[#424242]">{{ $group['label'] }}</span>
+                                                <button type="button"
+                                                        onclick="toggleAll('{{ $table }}')"
+                                                        class="text-xs font-semibold text-primary-700 hover:text-primary-600 transition-colors"
+                                                        id="toggle-{{ $table }}">
+                                                    Pilih Semua
+                                                </button>
+                                            </div>
+                                            {{-- Checkbox List --}}
+                                            <div class="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                @foreach($group['data'] as $penyakit)
+                                                    @php
+                                                        $key       = "{$table}:{$penyakit['id']}";
+                                                        $isChecked = $oldPenyakit !== null
+                                                            ? in_array($key, $oldPenyakit)
+                                                            : isset($linkedPenyakit[$key]);
+                                                    @endphp
+                                                    <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-[#F0F4F0] cursor-pointer transition-colors group">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="penyakit[]"
+                                                            value="{{ $key }}"
+                                                            class="penyakit-check-{{ $table }} w-4 h-4 rounded border-[#BDBDBD] text-primary-700 focus:ring-primary-600/30 cursor-pointer"
+                                                            {{ $isChecked ? 'checked' : '' }}
+                                                        >
+                                                        <span class="text-xs text-[#424242] group-hover:text-[#1A1A1A] leading-snug">{{ $penyakit['nama_penyakit'] }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-[#9E9E9E] italic">Data penyakit belum tersedia.</p>
+                        @endif
+                    </div>
                 </div>
+
 
                 {{-- Right Area: Image Upload with Preview --}}
                 <div class="space-y-4">
@@ -195,5 +252,44 @@
                 }
             }
         }
+
+        // Toggle all checkboxes in a penyakit group
+        function toggleAll(table) {
+            const checks = document.querySelectorAll('.penyakit-check-' + table);
+            const allChecked = Array.from(checks).every(c => c.checked);
+            checks.forEach(c => c.checked = !allChecked);
+            const btn = document.getElementById('toggle-' + table);
+            if (btn) btn.textContent = allChecked ? 'Pilih Semua' : 'Hapus Semua';
+        }
+
+        // ── Rupiah Input Formatter ──
+        (function () {
+            const hargaInput = document.getElementById('harga');
+            if (!hargaInput) return;
+
+            function formatRupiah(val) {
+                const digits = val.replace(/\D/g, '');
+                return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            hargaInput.addEventListener('input', function () {
+                const cursorPos = this.selectionStart;
+                const beforeLen = this.value.length;
+                this.value      = formatRupiah(this.value);
+                const afterLen  = this.value.length;
+                const newPos    = cursorPos + (afterLen - beforeLen);
+                this.setSelectionRange(Math.max(0, newPos), Math.max(0, newPos));
+            });
+
+            // Before submit: strip dots → server menerima angka bersih
+            const form = document.getElementById('form-edit-obat');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    hargaInput.value = hargaInput.value.replace(/\./g, '');
+                }, { capture: true });
+            }
+        })();
     </script>
 @endsection
+
+
