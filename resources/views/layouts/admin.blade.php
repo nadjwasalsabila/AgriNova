@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Dashboard' }} — Petani Maju Admin</title>
-    <meta name="description" content="Admin Dashboard Petani Maju — Kelola konten aplikasi pertanian Anda.">
+    <title>{{ $title ?? 'Dashboard' }} — AgriNova Admin</title>
+    <meta name="description" content="Admin Dashboard AgriNova — Platform Digital Pertanian Cerdas Indonesia.">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/AgriNova-App-Icon/icon-rounded-preview.svg') }}">
+    <link rel="alternate icon" href="{{ asset('assets/images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full font-sans antialiased" x-data="adminLayout()">

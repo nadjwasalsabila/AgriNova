@@ -8,10 +8,11 @@ use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\RiwayatScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes — Petani Maju Admin Dashboard
+| Web Routes — AgriNova Admin Dashboard
 |--------------------------------------------------------------------------
 */
 
@@ -41,6 +42,11 @@ Route::middleware(['web', 'admin.auth'])->prefix('admin')->name('admin.')->group
 
     // Riwayat Scan AI
     Route::get('/riwayat-scan', [RiwayatScanController::class, 'index'])->name('riwayat-scan.index');
+
+    // Kelola Pengguna & Langganan
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+    Route::post('/users/subscriptions/{id}/status', [UserController::class, 'updateStatus'])->name('users.subscription.status');
 
     // Pengaturan Akun
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

@@ -1,5 +1,5 @@
-@import 'tailwindcss';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -8,23 +8,32 @@
     /* ── Typography ── */
     --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
+    /* ── AgriNova Brand Colors (from mobile icon & illustrations) ── */
+    --color-agrinova-pine: #0F6E56;
+    --color-agrinova-forest: #1B5E20;
+    --color-agrinova-dark: #2E7D32;
+    --color-agrinova-mint: #5DCAA5;
+    --color-agrinova-lightmint: #DEF2E7;
+    --color-agrinova-gold: #D9A441;
+    --color-agrinova-warmbg: #F4F2E9;
+
     /* ── Primary Green (from AppColors.primaryGreen #1B5E20) ── */
     --color-primary-50:  #E8F5E9;
     --color-primary-100: #C8E6C9;
     --color-primary-400: #66BB6A;
     --color-primary-600: #2E7D32;
     --color-primary-700: #1B5E20;
-    --color-primary-800: #145218;
+    --color-primary-800: #0F6E56;
 
     /* ── Danger / Red ── */
     --color-danger-50:  #FFEBEE;
     --color-danger-400: #EF5350;
     --color-danger-700: #B71C1C;
 
-    /* ── Warning / Orange ── */
-    --color-warning-50:  #FFF3E0;
-    --color-warning-400: #FF8F00;
-    --color-warning-700: #E65100;
+    /* ── Warning / Orange / Gold ── */
+    --color-warning-50:  #FFF8E1;
+    --color-warning-400: #D9A441;
+    --color-warning-700: #B7811D;
 
     /* ── Info / Blue ── */
     --color-info-50:  #E3F2FD;
@@ -33,8 +42,8 @@
 
     /* ── Success ── */
     --color-success-50:  #E8F5E9;
-    --color-success-400: #66BB6A;
-    --color-success-700: #2E7D32;
+    --color-success-400: #5DCAA5;
+    --color-success-700: #0F6E56;
 
     /* ── Neutral ── */
     --color-surface:     #FFFFFF;
@@ -69,18 +78,18 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #F8F9FA; }
 ::-webkit-scrollbar-thumb { background: #C8E6C9; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #2E7D32; }
+::-webkit-scrollbar-thumb:hover { background: #0F6E56; }
 
 /* ── Sidebar active item ── */
 .nav-item-active {
     background-color: #E8F5E9;
-    color: #1B5E20;
-    border-left: 3px solid #1B5E20;
+    color: #0F6E56;
+    border-left: 3px solid #0F6E56;
     font-weight: 600;
 }
 
 .nav-item-active svg {
-    color: #1B5E20;
+    color: #0F6E56;
 }
 
 .nav-item-inactive {
@@ -90,12 +99,20 @@ body {
 
 .nav-item-inactive:hover {
     background-color: #F8F9FA;
-    color: #1B5E20;
+    color: #0F6E56;
 }
 
 /* ── Brand gradient ── */
 .brand-gradient {
-    background: linear-gradient(135deg, #2E7D32 0%, #66BB6A 100%);
+    background: linear-gradient(135deg, #0F6E56 0%, #1B5E20 50%, #2E7D32 100%);
+}
+
+.brand-gradient-teal {
+    background: linear-gradient(135deg, #0F6E56 0%, #5DCAA5 100%);
+}
+
+.brand-gradient-amber {
+    background: linear-gradient(135deg, #D9A441 0%, #FF8F00 100%);
 }
 
 /* ── Card shadow ── */
@@ -104,7 +121,7 @@ body {
 }
 
 .card-shadow-primary {
-    box-shadow: 2px 5px 16px rgba(27, 94, 32, 0.20);
+    box-shadow: 2px 8px 24px rgba(15, 110, 86, 0.22);
 }
 
 /* ── Transition ── */

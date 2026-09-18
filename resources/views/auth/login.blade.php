@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login — Petani Maju Admin</title>
-    <meta name="description" content="Login ke Admin Dashboard Petani Maju.">
+    <title>Login — AgriNova Admin</title>
+    <meta name="description" content="Login ke Admin Dashboard AgriNova — Platform Digital Pertanian Cerdas Indonesia.">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/AgriNova-App-Icon/icon-rounded-preview.svg') }}">
+    <link rel="alternate icon" href="{{ asset('assets/images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full font-sans antialiased bg-[#F8F9FA]">
@@ -29,86 +32,98 @@
             </svg>
         </div>
 
+        {{-- Decorative circles matching mobile theme --}}
+        <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-white/5"></div>
+        <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5"></div>
+        <div class="absolute top-1/2 -right-12 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
+
         {{-- Content --}}
         <div class="relative z-10 flex flex-col justify-center items-center w-full px-12 xl:px-20 text-white">
-            {{-- Logo --}}
-            <div class="w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-8 border border-white/20">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M5 3s4.5 0 9 4.5C18.5 12 19 17 19 17s-5-.5-9.5-5C5 7.5 5 3 5 3z
-                           M5 3c0 0 0 7 7 11"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M12 14c0 3.866-3 7-3 7"/>
-                </svg>
+            {{-- Official AgriNova Logo --}}
+            <div class="relative mb-6 group">
+                <div class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#5DCAA5] to-[#D9A441] opacity-30 blur-md group-hover:opacity-50 transition duration-300"></div>
+                <div class="relative w-24 h-24 rounded-3xl bg-white/15 backdrop-blur-md p-3.5 flex items-center justify-center border border-white/25 shadow-2xl">
+                    <img src="{{ asset('assets/AgriNova-App-Icon/icon-rounded-preview.svg') }}" 
+                         alt="AgriNova Logo" 
+                         class="w-full h-full object-contain rounded-2xl drop-shadow-md"
+                         onerror="this.onerror=null; this.src='{{ asset('assets/images/logo.png') }}'">
+                </div>
             </div>
 
-            <h1 class="text-4xl xl:text-5xl font-bold text-center leading-tight mb-4">
-                Petani Maju
-            </h1>
-            <p class="text-lg text-white/80 text-center max-w-sm leading-relaxed mb-12">
-                Platform digital untuk pertanian cerdas Indonesia
+            <div class="flex items-center gap-2 mb-2">
+                <h1 class="text-4xl xl:text-5xl font-extrabold text-center tracking-tight leading-tight">
+                    AgriNova
+                </h1>
+                <span class="px-2 py-0.5 text-xs font-bold bg-[#DEF2E7] text-[#0F6E56] rounded-full shadow-sm">
+                    v2.0
+                </span>
+            </div>
+
+            <p class="text-base text-white/85 text-center max-w-md leading-relaxed mb-10 font-normal">
+                Platform digital asisten pintar untuk membantu pertanian Indonesia lebih produktif, cerdas, dan efisien.
             </p>
 
-            {{-- Feature list --}}
-            <div class="space-y-4 w-full max-w-sm">
+            {{-- Feature list mirroring mobile onboarding pillars --}}
+            <div class="space-y-3.5 w-full max-w-md bg-white/10 backdrop-blur-sm p-5 rounded-2xl border border-white/15 shadow-lg">
                 @foreach([
-                    ['icon' => 'lightbulb', 'text' => 'Kelola artikel & tips pertanian'],
-                    ['icon' => 'bug',       'text' => 'Pantau database hama & penyakit'],
-                    ['icon' => 'camera',    'text' => 'Monitor riwayat scan AI petani'],
-                    ['icon' => 'calendar',  'text' => 'Atur jadwal tanam terintegrasi'],
+                    ['icon' => 'bug',       'title' => 'Deteksi Hama & AI',         'desc' => 'Identifikasi hama dan penyakit via scan AI cerdas'],
+                    ['icon' => 'cloud',     'title' => 'Cuaca & Prediksi Presisi',   'desc' => 'Prakiraan cuaca harian dan mitigasi pertanian'],
+                    ['icon' => 'calendar',  'title' => 'Kalender Tanam Terpadu',    'desc' => 'Pengingat jadwal semai, pupuk, dan perawatan'],
+                    ['icon' => 'lightbulb', 'title' => 'Tips & Panduan Tani',       'desc' => 'Edukasi dan rekomendasi obat tanaman resmi'],
                 ] as $feature)
-                    <div class="flex items-center gap-4">
-                        <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                    <div class="flex items-center gap-3.5 p-2 rounded-xl hover:bg-white/10 transition-colors">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/20 text-[#DEF2E7]">
                             @if($feature['icon'] === 'lightbulb')
-                                <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                 </svg>
                             @elseif($feature['icon'] === 'bug')
-                                <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6"/>
                                 </svg>
-                            @elseif($feature['icon'] === 'camera')
-                                <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            @elseif($feature['icon'] === 'cloud')
+                                <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/>
                                 </svg>
                             @else
-                                <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             @endif
                         </div>
-                        <span class="text-sm text-white/90 font-medium">{{ $feature['text'] }}</span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-white leading-tight">{{ $feature['title'] }}</p>
+                            <p class="text-xs text-white/70 leading-tight mt-0.5 truncate">{{ $feature['desc'] }}</p>
+                        </div>
                     </div>
                 @endforeach
             </div>
         </div>
-
-        {{-- Decorative circles --}}
-        <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-white/5"></div>
-        <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5"></div>
     </div>
 
     {{-- ── Right Panel — Login Form ── --}}
     <div class="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16 xl:px-24 py-12">
 
         {{-- Mobile logo --}}
-        <div class="lg:hidden mb-8 flex flex-col items-center">
-            <div class="w-14 h-14 rounded-2xl brand-gradient flex items-center justify-center mb-3">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M5 3s4.5 0 9 4.5C18.5 12 19 17 19 17s-5-.5-9.5-5C5 7.5 5 3 5 3z
-                           M5 3c0 0 0 7 7 11"/>
-                </svg>
+        <div class="lg:hidden mb-8 flex flex-col items-center text-center">
+            <img src="{{ asset('assets/AgriNova-App-Icon/icon-rounded-preview.svg') }}" 
+                 alt="AgriNova Logo" 
+                 class="w-16 h-16 rounded-2xl shadow-md mb-2 object-contain"
+                 onerror="this.onerror=null; this.src='{{ asset('assets/images/logo.png') }}'">
+            <div class="flex items-center gap-1.5">
+                <p class="text-xl font-bold text-[#1A1A1A]">AgriNova</p>
+                <span class="px-1.5 py-0.2 text-[9px] font-bold bg-[#E8F5E9] text-[#0F6E56] rounded-full">v2.0</span>
             </div>
-            <p class="text-lg font-bold text-[#1A1A1A]">Petani Maju</p>
+            <p class="text-xs text-[#9E9E9E] mt-0.5">Admin Dashboard Pertanian</p>
         </div>
 
         <div class="w-full max-w-md">
 
             {{-- Header --}}
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-[#1A1A1A] mb-2">Selamat Datang 👋</h2>
-                <p class="text-sm text-[#9E9E9E]">Masuk ke panel admin Petani Maju</p>
+                <h2 class="text-2xl font-bold text-[#1A1A1A] mb-1.5">Selamat Datang 👋</h2>
+                <p class="text-sm text-[#9E9E9E]">Masuk ke panel admin AgriNova</p>
             </div>
 
             {{-- Dev mode notice --}}
@@ -160,7 +175,7 @@
                             autocomplete="email"
                             required
                             value="{{ old('email') }}"
-                            placeholder="admin@petanimaju.com"
+                            placeholder="admin@agrinova.id"
                             class="w-full pl-10 pr-4 py-3 text-sm text-[#1A1A1A] bg-white
                                    border border-[#E0E0E0] rounded-xl
                                    placeholder:text-[#BDBDBD]
@@ -226,7 +241,7 @@
 
             {{-- Footer --}}
             <p class="mt-8 text-center text-xs text-[#BDBDBD]">
-                &copy; {{ date('Y') }} Petani Maju. All rights reserved.
+                &copy; {{ date('Y') }} AgriNova. All rights reserved.
             </p>
         </div>
     </div>

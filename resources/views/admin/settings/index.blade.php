@@ -14,9 +14,14 @@
         {{-- ── Left Column: Profile Card Overview ── --}}
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl border border-[#E0E0E0] card-shadow p-6 text-center">
-                <div
-                    class="w-20 h-20 rounded-full brand-gradient mx-auto flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-md">
-                    {{ strtoupper(substr($adminName, 0, 1)) }}
+                <div class="w-20 h-20 rounded-full overflow-hidden brand-gradient mx-auto flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-md border-2 border-white ring-2 ring-[#DEF2E7]">
+                    <img src="{{ asset('assets/images/profiles.png') }}" 
+                         alt="{{ $adminName }}"
+                         class="w-full h-full object-cover"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <span style="display: none;" class="w-full h-full items-center justify-center text-white text-2xl font-bold">
+                        {{ strtoupper(substr($adminName, 0, 1)) }}
+                    </span>
                 </div>
                 <h3 class="text-base font-bold text-[#1A1A1A]">{{ $adminName }}</h3>
                 <p class="text-xs text-[#9E9E9E] mt-0.5 mb-4">{{ $adminEmail }}</p>

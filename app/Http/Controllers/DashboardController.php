@@ -64,7 +64,7 @@ class DashboardController extends Controller
                 'icon'       => 'users',
                 'icon_bg'    => 'bg-[#FFF3E0]',
                 'icon_color' => 'text-[#E65100]',
-                'href'       => '#',
+                'href'       => route('admin.users.index'),
             ],
             [
                 'label'      => 'Total Transaksi',
@@ -73,7 +73,7 @@ class DashboardController extends Controller
                 'icon'       => 'receipt',
                 'icon_bg'    => 'bg-[#E3F2FD]',
                 'icon_color' => 'text-[#1565C0]',
-                'href'       => '#',
+                'href'       => route('admin.users.index', ['tab' => 'transactions']),
             ],
         ];
 
@@ -115,7 +115,7 @@ class DashboardController extends Controller
             'users'     => $this->supabase->countUsers() === -1
                 ? $this->supabase->countWithFallbacks(['users', 'profiles', 'members'], $token)
                 : $this->supabase->countUsers(),
-            'transaksi' => $this->supabase->countWithFallbacks(['transaksi', 'transactions'], $token),
+            'transaksi' => $this->supabase->countWithFallbacks(['subscriptions', 'transaksi', 'transactions'], $token),
         ];
     }
 

@@ -98,7 +98,7 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             // Fallback to env credentials if they match the admin configuration in .env
-            $adminEmail = env('ADMIN_EMAIL', 'admin@petanimaju.com');
+            $adminEmail = env('ADMIN_EMAIL', 'admin@agrinova.id');
             $adminPass  = env('ADMIN_PASSWORD_PLAIN', 'admin123');
 
             if ($request->email === $adminEmail && $request->password === $adminPass) {
@@ -116,7 +116,7 @@ class AuthController extends Controller
      */
     private function loginWithEnvCredentials(Request $request)
     {
-        $adminEmail = env('ADMIN_EMAIL', 'admin@petanimaju.com');
+        $adminEmail = env('ADMIN_EMAIL', 'admin@agrinova.id');
         $adminPass  = env('ADMIN_PASSWORD_PLAIN', 'admin123');
 
         if ($request->email !== $adminEmail || $request->password !== $adminPass) {

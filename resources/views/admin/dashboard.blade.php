@@ -15,8 +15,8 @@
             <h2 class="text-white text-xl font-bold">
                 Selamat datang, {{ session('admin_name', 'Admin') }}! 👋
             </h2>
-            <p class="text-white/70 text-sm mt-1">
-                Berikut ringkasan data terkini aplikasi Petani Maju.
+            <p class="text-white/80 text-sm mt-1">
+                Berikut ringkasan data terkini platform dan aplikasi mobile AgriNova.
             </p>
         </div>
         <div class="shrink-0 flex items-center gap-2">
@@ -66,8 +66,13 @@
             $isNA = $stat['raw'] < 0;
         @endphp
 
-        <div class="bg-white rounded-2xl border border-[#E0E0E0] p-5 card-shadow
-                    hover:border-[#C8E6C9] hover:shadow-md transition-all duration-200 group">
+        @if(!empty($stat['href']) && $stat['href'] !== '#')
+            <a href="{{ $stat['href'] }}" class="block bg-white rounded-2xl border border-[#E0E0E0] p-5 card-shadow
+                        hover:border-[#C8E6C9] hover:shadow-md transition-all duration-200 group">
+        @else
+            <div class="bg-white rounded-2xl border border-[#E0E0E0] p-5 card-shadow
+                        hover:border-[#C8E6C9] hover:shadow-md transition-all duration-200 group">
+        @endif
 
             <div class="flex items-start justify-between mb-4">
                 {{-- Icon --}}
@@ -76,6 +81,12 @@
                         {!! $iconPaths[$stat['icon']] ?? '' !!}
                     </svg>
                 </div>
+
+                @if(!empty($stat['href']) && $stat['href'] !== '#')
+                    <span class="text-[#9E9E9E] group-hover:text-[#0F6E56] transition-colors text-xs font-semibold flex items-center gap-0.5">
+                        Buka &rarr;
+                    </span>
+                @endif
             </div>
 
             {{-- Value --}}
@@ -84,7 +95,12 @@
                 {{ $stat['value'] }}
             </p>
             <p class="text-sm text-[#9E9E9E] font-medium">{{ $stat['label'] }}</p>
-        </div>
+
+        @if(!empty($stat['href']) && $stat['href'] !== '#')
+            </a>
+        @else
+            </div>
+        @endif
     @endforeach
 </div>
 

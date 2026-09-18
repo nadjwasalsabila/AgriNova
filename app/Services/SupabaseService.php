@@ -15,7 +15,7 @@ class SupabaseService
     {
         $this->url        = rtrim(env('SUPABASE_URL', ''), '/');
         $this->anonKey    = env('SUPABASE_ANON_KEY', '');
-        $this->serviceKey = env('SUPABASE_SERVICE_ROLE_KEY', '');
+        $this->serviceKey = trim(env('SUPABASE_SERVICE_ROLE_KEY', ''));
     }
 
     // ─────────────────────────────────────────────
@@ -517,4 +517,256 @@ class SupabaseService
             'Authorization' => "Bearer {$key}",
         ])->delete($url);
     }
+
+    // ─────────────────────────────────────────────
+    //  Manage Users & Subscriptions
+    // ─────────────────────────────────────────────
+
+    /**
+     * Get all raw subscriptions from Supabase 'subscriptions' table.
+     */
+    public function getSubscriptions(array $filters = []): array
+    {
+        if (! $this->isConfigured()) {
+            return [];
+        }
+
+        try {
+            $key = $this->serviceKey ?: $this->anonKey;
+            $query = [
+                'select' => '*',
+                'order'  => 'created_at.desc',
+            ];
+
+            if (! empty($filters['status'])) {
+                $query['status'] = 'eq.' . $filters['status'];
+            }
+            if (! empty($filters['user_id'])) {
+                $query['user_id'] = 'eq.' . $filters['user_id'];
+            }
+            if (! empty($filters['plan_name'])) {
+                $query['plan_name'] = 'ilike.*' . $filters['plan_name'] . '*';
+            }
+
+            $response = Http::withHeaders([
+                'apikey'        => $key,
+                'Authorization' => "Bearer {$key}",
+            ])->get("{$this->url}/rest/v1/subscriptions", $query);
+
+            return $response->successful() ? ($response->json() ?? []) : [];
+        } catch (\Throwable $e) {
+            Log::error('SupabaseService getSubscriptions error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Fetch all users from Supabase Auth admin API.
+     */
+    public function getAuthUsers(): array
+    {
+        if (empty($this->serviceKey)) {
+            return [];
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'apikey'        => $this->serviceKey,
+                'Authorization' => "Bearer {$this->serviceKey}",
+            ])->get("{$this->url}/auth/v1/admin/users", [
+                'per_page' => 1000,
+            ]);
+
+            if ($response->failed()) {
+                Log::warning('SupabaseService getAuthUsers failed: ' . $response->body());
+                return [];
+            }
+
+            $json = $response->json();
+            return $json['users'] ?? (is_array($json) ? $json : []);
+        } catch (\Throwable $e) {
+            Log::error('SupabaseService getAuthUsers error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get joined users with their subscription details, active plan, and transaction history.
+     */
+    public function getUsersWithSubscriptions(array $filters = []): array
+    {
+        $users = $this->getAuthUsers();
+        $subscriptions = $this->getSubscriptions();
+
+        // Index subscriptions by user_id
+        $subsByUser = [];
+        foreach ($subscriptions as $sub) {
+            $uId = $sub['user_id'] ?? null;
+            if ($uId) {
+                $subsByUser[$uId][] = $sub;
+            }
+        }
+
+        $now = now();
+        $userList = [];
+
+        foreach ($users as $user) {
+            $uId = $user['id'];
+            $meta = $user['user_metadata'] ?? [];
+            $userSubs = $subsByUser[$uId] ?? [];
+
+            // Sort user subscriptions by created_at desc
+            usort($userSubs, fn ($a, $b) => strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''));
+
+            // Determine active subscription
+            $activeSub = null;
+            foreach ($userSubs as $s) {
+                $status = strtolower($s['status'] ?? '');
+                $expiresAt = ! empty($s['expires_at']) ? \Carbon\Carbon::parse($s['expires_at']) : null;
+                if ($status === 'active' && ($expiresAt === null || $expiresAt->isAfter($now))) {
+                    $activeSub = $s;
+                    break;
+                }
+            }
+
+            // Fallback to user_metadata if activeSub not found in table
+            $isMetaPremium = (bool) ($meta['is_premium'] ?? false);
+            $metaExpiry = ! empty($meta['premium_expiry']) ? \Carbon\Carbon::parse($meta['premium_expiry']) : null;
+            $metaIsActive = $isMetaPremium && ($metaExpiry === null || $metaExpiry->isAfter($now));
+
+            $planName = 'Gratis';
+            $status = 'free';
+            $expiresAt = null;
+            $startedAt = null;
+
+            if ($activeSub) {
+                $planName = $activeSub['plan_name'] ?? 'Nova Basic';
+                $status = 'active';
+                $expiresAt = $activeSub['expires_at'] ?? null;
+                $startedAt = $activeSub['started_at'] ?? null;
+            } elseif ($metaIsActive) {
+                $planName = $meta['premium_plan'] ?? 'Nova Basic';
+                $status = 'active';
+                $expiresAt = $meta['premium_expiry'] ?? null;
+            } elseif (! empty($userSubs)) {
+                // User previously had subscriptions but now expired
+                $latest = $userSubs[0];
+                $planName = $latest['plan_name'] ?? 'Nova Basic';
+                $status = 'expired';
+                $expiresAt = $latest['expires_at'] ?? null;
+                $startedAt = $latest['started_at'] ?? null;
+            }
+
+            $totalSpent = array_sum(array_column($userSubs, 'amount'));
+
+            $name = $meta['full_name'] 
+                ?? $meta['name'] 
+                ?? (explode('@', $user['email'] ?? 'User')[0]);
+
+            $userData = [
+                'id'                   => $uId,
+                'email'                => $user['email'] ?? '-',
+                'name'                 => $name,
+                'phone'                => $user['phone'] ?? ($meta['phone'] ?? null),
+                'avatar'               => $meta['avatar_url'] ?? null,
+                'created_at'           => $user['created_at'] ?? null,
+                'last_sign_in_at'      => $user['last_sign_in_at'] ?? null,
+                'email_confirmed_at'   => $user['email_confirmed_at'] ?? null,
+                'plan_name'            => $planName,
+                'status'               => $status, // active, expired, free
+                'is_active'            => $status === 'active',
+                'expires_at'           => $expiresAt,
+                'started_at'           => $startedAt,
+                'active_subscription'  => $activeSub,
+                'subscriptions'        => $userSubs,
+                'total_orders'         => count($userSubs),
+                'total_spent'          => $totalSpent,
+                'user_metadata'        => $meta,
+            ];
+
+            // Filter: Search
+            if (! empty($filters['search'])) {
+                $q = strtolower($filters['search']);
+                $searchable = strtolower($userData['name'] . ' ' . $userData['email'] . ' ' . $userData['id']);
+                // Also search in user orders
+                foreach ($userSubs as $sub) {
+                    $searchable .= ' ' . strtolower($sub['order_id'] ?? '') . ' ' . strtolower($sub['payment_type'] ?? '');
+                }
+                if (! str_contains($searchable, $q)) {
+                    continue;
+                }
+            }
+
+            // Filter: Status (all, active, free, expired)
+            if (! empty($filters['status']) && $filters['status'] !== 'all') {
+                if ($userData['status'] !== $filters['status']) {
+                    continue;
+                }
+            }
+
+            // Filter: Plan Name
+            if (! empty($filters['plan']) && $filters['plan'] !== 'all') {
+                $planFilter = strtolower($filters['plan']);
+                $userPlan = strtolower($userData['plan_name']);
+                if (! str_contains($userPlan, $planFilter)) {
+                    continue;
+                }
+            }
+
+            $userList[] = $userData;
+        }
+
+        // Sort: Active users first, then by registration created_at desc
+        usort($userList, function ($a, $b) {
+            if ($a['is_active'] !== $b['is_active']) {
+                return $a['is_active'] ? -1 : 1;
+            }
+            return strcmp($b['created_at'] ?? '', $a['created_at'] ?? '');
+        });
+
+        return $userList;
+    }
+
+    /**
+     * Get a single user with full subscription details.
+     */
+    public function getUserWithSubscriptions(string $userId): ?array
+    {
+        $users = $this->getUsersWithSubscriptions();
+        foreach ($users as $user) {
+            if ($user['id'] === $userId) {
+                return $user;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update subscription status in Supabase.
+     */
+    public function updateSubscriptionStatus(string $subId, string $status): bool
+    {
+        if (! $this->isConfigured()) {
+            return false;
+        }
+
+        try {
+            $key = $this->serviceKey ?: $this->anonKey;
+            $response = Http::withHeaders([
+                'apikey'        => $key,
+                'Authorization' => "Bearer {$key}",
+                'Content-Type'  => 'application/json',
+                'Prefer'        => 'return=representation',
+            ])->patch("{$this->url}/rest/v1/subscriptions?id=eq.{$subId}", [
+                'status'     => $status,
+                'updated_at' => now()->toIso8601String(),
+            ]);
+
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error('SupabaseService updateSubscriptionStatus error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
+
