@@ -8,9 +8,10 @@
     <meta name="description" content="Admin Dashboard Petani Maju — Kelola konten aplikasi pertanian Anda.">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+{{-- PERBAIKAN: Hapus overflow-hidden dari body agar modal tidak freeze halaman --}}
 <body class="h-full font-sans antialiased" x-data="adminLayout()">
 
-    {{-- ── Sidebar Overlay (mobile) ── --}}
+    {{-- Sidebar Overlay (mobile) --}}
     <div
         x-show="sidebarOpen"
         x-transition:enter="transition-opacity ease-linear duration-300"
@@ -26,17 +27,19 @@
 
     <div class="flex h-full">
 
-        {{-- ── Sidebar ── --}}
+        {{-- Sidebar --}}
         @include('components.admin.sidebar')
 
-        {{-- ── Main Area ── --}}
-        <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+        {{-- Main Area --}}
+        {{-- PERBAIKAN: overflow-hidden dihapus dari wrapper ini --}}
+        <div class="flex flex-col flex-1 min-w-0">
 
-            {{-- ── Topbar ── --}}
+            {{-- Topbar --}}
             @include('components.admin.topbar')
 
-            {{-- ── Page Content ── --}}
-            <main class="flex-1 overflow-y-auto bg-[#F8F9FA] p-6">
+            {{-- Page Content --}}
+            {{-- PERBAIKAN: main pakai overflow-y-auto saja, TANPA overflow-hidden --}}
+            <main id="mainContent" class="flex-1 overflow-y-auto bg-[#F8F9FA] p-6">
 
                 @if(session('success'))
                     <div class="mb-4 flex items-center gap-3 bg-[#E8F5E9] border border-[#C8E6C9]
@@ -65,7 +68,7 @@
         </div>
     </div>
 
-    {{-- ── Alpine.js CDN ── --}}
+    {{-- Alpine.js CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         function adminLayout() {
@@ -75,6 +78,8 @@
             }
         }
     </script>
+
+    @stack('scripts')
 
 </body>
 </html>
