@@ -42,13 +42,10 @@
                     @if(! empty($user['avatar']))
                         <img src="{{ $user['avatar'] }}" alt="{{ $user['name'] }}" class="w-full h-full object-cover">
                     @else
-                        <img src="{{ asset('assets/images/profiles.png') }}" 
+                        <img src="{{ asset('assets/images/default-avatar.svg') }}" 
                              alt="{{ $user['name'] }}" 
                              class="w-full h-full object-cover"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                        <span style="display: none;" class="w-full h-full items-center justify-center text-white text-2xl font-bold">
-                            {{ strtoupper(substr($user['name'], 0, 1)) }}
-                        </span>
+                             onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
                     @endif
                 </div>
 
