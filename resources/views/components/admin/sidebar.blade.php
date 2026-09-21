@@ -130,14 +130,11 @@ $icons = [
     <div class="border-t border-[#E0E0E0] p-4">
         <div class="flex items-center gap-3">
             {{-- Avatar --}}
-            <div class="w-9 h-9 rounded-full overflow-hidden bg-[#0F6E56] flex items-center justify-center shrink-0 border border-[#DEF2E7]">
-                <img src="{{ asset('assets/images/profiles.png') }}" 
+            <div class="w-9 h-9 rounded-full overflow-hidden bg-[#DFE5E7] flex items-center justify-center shrink-0 border border-[#E0E0E0]">
+                <img src="{{ asset('assets/images/default-avatar.svg') }}" 
                      alt="{{ session('admin_name', 'Admin') }}"
                      class="w-full h-full object-cover"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <span style="display: none;" class="w-full h-full items-center justify-center text-white text-xs font-bold bg-[#0F6E56]">
-                    {{ strtoupper(substr(session('admin_name', 'A'), 0, 1)) }}
-                </span>
+                     onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-[#1A1A1A] truncate leading-tight">

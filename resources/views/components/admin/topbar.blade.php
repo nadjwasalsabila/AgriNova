@@ -149,14 +149,11 @@
         {{-- Admin Avatar + Name --}}
         <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg
                         hover:bg-[#F8F9FA] transition-colors duration-150 group">
-            <div class="w-8 h-8 rounded-full overflow-hidden bg-[#0F6E56] flex items-center justify-center border border-[#DEF2E7] shrink-0">
-                <img src="{{ asset('assets/images/profiles.png') }}" 
+            <div class="w-8 h-8 rounded-full overflow-hidden bg-[#DFE5E7] flex items-center justify-center border border-[#E0E0E0] shrink-0">
+                <img src="{{ asset('assets/images/default-avatar.svg') }}" 
                      alt="{{ session('admin_name', 'Admin') }}"
                      class="w-full h-full object-cover"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <span style="display: none;" class="w-full h-full items-center justify-center text-white text-xs font-bold bg-[#0F6E56]">
-                    {{ strtoupper(substr(session('admin_name', 'A'), 0, 1)) }}
-                </span>
+                     onerror="this.src='{{ asset('assets/images/default-avatar.png') }}'">
             </div>
             <span class="hidden sm:block text-sm font-medium text-[#1A1A1A] max-w-[120px] truncate">
                 {{ session('admin_name', 'Admin') }}

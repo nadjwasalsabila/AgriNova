@@ -8,7 +8,14 @@ use Illuminate\Support\Str;
 
 class ArtikelController extends Controller
 {
-    public function __construct(private SupabaseService $supabase) {}
+    private \App\Services\AgriScraperService $scraper;
+
+    public function __construct(
+        private SupabaseService $supabase,
+        ?\App\Services\AgriScraperService $scraper = null
+    ) {
+        $this->scraper = $scraper ?? app(\App\Services\AgriScraperService::class);
+    }
 
     /**
      * Display a listing of the articles.
@@ -31,6 +38,22 @@ class ArtikelController extends Controller
 
         // Fetch articles from 'tips' table in Supabase
         $articles = $this->supabase->select('tips', $params, $token);
+
+        // Enhance articles with parsed source & clean thumbnail
+        $articles = array_map(function ($art) {
+            $art['source_label'] = '';
+            $art['source_url'] = '';
+            if (preg_match('/### 🌐 Sumber\s*[:\n]\s*(.*?)(###|$)/su', $art['content'] ?? '', $matches)) {
+                $raw = trim($matches[1]);
+                if (preg_match('/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/', $raw, $linkMatch)) {
+                    $art['source_label'] = $linkMatch[1];
+                    $art['source_url'] = $linkMatch[2];
+                } else {
+                    $art['source_label'] = $raw;
+                }
+            }
+            return $art;
+        }, $articles);
 
         return view('admin.artikel.index', [
             'title'    => 'Artikel & Tips Pertanian',
@@ -60,6 +83,7 @@ class ArtikelController extends Controller
             'status'       => ['required', 'string', 'in:Publikasi,Draf'],
             'published_at' => ['required', 'date'],
             'content'      => ['required', 'string'],
+            'sumber'       => ['nullable', 'string', 'max:500'],
             'thumbnail'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'title.required'        => 'Judul artikel wajib diisi.',
@@ -90,11 +114,28 @@ class ArtikelController extends Controller
                 );
             }
 
+            // Jika tidak mengunggah file thumbnail, berikan foto pertanian spesifik
+            if (empty($imageUrl)) {
+                $imageUrl = $this->scraper->getTopicSpecificImage($request->title, $request->category);
+            }
+
+            // Format konten dengan sumber
+            $content = $request->input('content');
+            $sumber = trim($request->input('sumber', ''));
+            if (! empty($sumber) && ! str_contains($content, '### 🌐 Sumber')) {
+                if (filter_var($sumber, FILTER_VALIDATE_URL)) {
+                    $label = $this->scraper->determineSourceLabel($sumber);
+                    $content .= "\n\n### 🌐 Sumber\n[{$label}]({$sumber})";
+                } else {
+                    $content .= "\n\n### 🌐 Sumber\n{$sumber}";
+                }
+            }
+
             // Save to database 'tips' table (which the mobile app queries)
             $this->supabase->insert('tips', [
                 'title'        => $request->title,
                 'category'     => $request->category,
-                'content'      => $request->input('content'),
+                'content'      => $content,
                 'status'       => $request->status,
                 'published_at' => date('c', strtotime($request->published_at)),
                 'image_url'    => $imageUrl,
@@ -105,7 +146,7 @@ class ArtikelController extends Controller
 
         } catch (\Throwable $e) {
             // Clean up uploaded image if insert fails
-            if ($imageUrl) {
+            if ($imageUrl && str_contains($imageUrl, 'supabase.co')) {
                 $this->deleteImageFromUrl($imageUrl);
             }
 
@@ -128,9 +169,25 @@ class ArtikelController extends Controller
                 ->with('error', 'Artikel tidak ditemukan.');
         }
 
+        // Ekstrak sumber yang tersimpan dari konten
+        $sumber = '';
+        if (preg_match('/### 🌐 Sumber\s*[:\n]\s*(.*?)(###|$)/su', $article['content'] ?? '', $matches)) {
+            $raw = trim($matches[1]);
+            if (preg_match('/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/', $raw, $linkMatch)) {
+                $sumber = $linkMatch[2];
+            } else {
+                $sumber = $raw;
+            }
+        }
+
+        // Bersihkan bagian ### 🌐 Sumber dari textarea agar tidak tertumpuk ganda
+        $cleanContent = preg_replace('/\n*### 🌐 Sumber.*$/su', '', $article['content'] ?? '');
+        $article['content'] = trim($cleanContent);
+
         return view('admin.artikel.edit', [
             'title'   => 'Edit Artikel',
             'article' => $article,
+            'sumber'  => $sumber,
         ]);
     }
 
@@ -145,6 +202,7 @@ class ArtikelController extends Controller
             'status'       => ['required', 'string', 'in:Publikasi,Draf'],
             'published_at' => ['required', 'date'],
             'content'      => ['required', 'string'],
+            'sumber'       => ['nullable', 'string', 'max:500'],
             'thumbnail'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'title.required'        => 'Judul artikel wajib diisi.',
@@ -182,9 +240,30 @@ class ArtikelController extends Controller
                     $file->getMimeType()
                 );
 
-                // Delete old image from Storage
-                if ($oldImageUrl) {
+                // Delete old image from Storage if it was uploaded to supabase
+                if ($oldImageUrl && str_contains($oldImageUrl, 'supabase.co')) {
                     $this->deleteImageFromUrl($oldImageUrl);
+                }
+            }
+
+            // Jika thumbnail lama berupa logo website atau kosong, ganti dengan foto pertanian spesifik
+            $imgLower = strtolower($imageUrl ?? '');
+            if (empty($imageUrl) || str_contains($imgLower, 'horti_indonesia.png') || str_contains($imgLower, 'msmb-logo') || str_contains($imgLower, 'lumbung-informasi')) {
+                $imageUrl = $this->scraper->getTopicSpecificImage($request->title, $request->category);
+            }
+
+            // Format konten dan perbarui sumber
+            $content = $request->input('content');
+            $content = preg_replace('/\n*### 🌐 Sumber.*$/su', '', $content);
+            $content = trim($content);
+
+            $sumber = trim($request->input('sumber', ''));
+            if (! empty($sumber)) {
+                if (filter_var($sumber, FILTER_VALIDATE_URL)) {
+                    $label = $this->scraper->determineSourceLabel($sumber);
+                    $content .= "\n\n### 🌐 Sumber\n[{$label}]({$sumber})";
+                } else {
+                    $content .= "\n\n### 🌐 Sumber\n{$sumber}";
                 }
             }
 
@@ -192,7 +271,7 @@ class ArtikelController extends Controller
             $this->supabase->update('tips', $id, [
                 'title'        => $request->title,
                 'category'     => $request->category,
-                'content'      => $request->input('content'),
+                'content'      => $content,
                 'status'       => $request->status,
                 'published_at' => date('c', strtotime($request->published_at)),
                 'image_url'    => $imageUrl,
@@ -203,7 +282,7 @@ class ArtikelController extends Controller
 
         } catch (\Throwable $e) {
             // Clean up newly uploaded image if update fails
-            if ($request->hasFile('thumbnail') && $imageUrl !== $oldImageUrl) {
+            if ($request->hasFile('thumbnail') && $imageUrl !== $oldImageUrl && str_contains($imageUrl, 'supabase.co')) {
                 $this->deleteImageFromUrl($imageUrl);
             }
 

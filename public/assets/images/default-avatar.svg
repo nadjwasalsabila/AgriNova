@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <clipPath id="avatarCircle">
+      <circle cx="250" cy="250" r="250" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#avatarCircle)">
+    <!-- WhatsApp / Instagram default background -->
+    <rect width="500" height="500" fill="#DFE5E7" />
+    
+    <!-- Bald head ("botak") -->
+    <circle cx="250" cy="180" r="88" fill="#FFFFFF" />
+    
+    <!-- Natural curved shoulders / torso -->
+    <path d="M 60 500 C 60 370, 150 305, 250 305 C 350 305, 440 370, 440 500 Z" fill="#FFFFFF" />
+  </g>
+</svg>
