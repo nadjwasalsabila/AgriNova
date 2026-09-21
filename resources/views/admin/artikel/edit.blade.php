@@ -110,6 +110,19 @@
                         </div>
                     </div>
 
+                    {{-- Sumber / Referensi --}}
+                    <div>
+                        <label for="sumber" class="block text-sm font-semibold text-[#424242] mb-1.5">Sumber / Referensi Artikel <span class="text-xs font-normal text-[#9E9E9E]">(opsional, misal link portal tani atau nama instansi)</span></label>
+                        <input
+                            type="text"
+                            name="sumber"
+                            id="sumber"
+                            value="{{ old('sumber', $sumber ?? '') }}"
+                            placeholder="Contoh: https://pertanian.go.id/... atau IPB Digitani"
+                            class="w-full px-4 py-2.5 text-sm text-[#1A1A1A] bg-white border border-[#E0E0E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 transition-colors"
+                        >
+                    </div>
+
                     {{-- Isi Konten --}}
                     <div>
                         <label for="content" class="block text-sm font-semibold text-[#424242] mb-1.5">Isi Konten Artikel <span class="text-danger-700">*</span></label>
